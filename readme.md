@@ -38,10 +38,13 @@ See photos folder for more photos.
 1. Very slow playback of the movies will start
 1. Put it somewhere nice and enjoy
 
-## Configurations
+## Development
 
 In the main source file, there is a `#define DEBUG` line you can uncomment to make the screen refresh quicker.
 There is also a `BOARD_TYPE` configuration for the display type used for your project. The pin configurations will be different for each board.
+
+The board will often go into deep sleep while you are trying to flash it, to force it to go into DFU mode, hold the `STR_IO0` button and press the `REST` button
+(or plug in the board at the same time)
 
 ## Generating the images
 

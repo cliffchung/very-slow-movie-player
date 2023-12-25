@@ -54,9 +54,9 @@ RTC_DATA_ATTR int bootCount = 0;
     (larger values - longer battery life)
 */
 #ifdef DEBUG
-  #define TIME_TO_SLEEP 5
+  #define TIME_TO_SLEEP_S 10
 #else
-  #define TIME_TO_SLEEP 120
+  #define TIME_TO_SLEEP_S 120
 #endif
 
 /*
@@ -262,8 +262,8 @@ void setup()
   //------------------------------
   // Go to sleep
   //------------------------------
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP) + " seconds");
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP_S * uS_TO_S_FACTOR);
+  Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP_S) + " seconds");
   Serial.flush();
   esp_deep_sleep_start();
 }
