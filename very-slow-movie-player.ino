@@ -13,13 +13,33 @@
 #include "JpegUtils.h"
 #include "DrawFuncs.h"
 
-#define SD_MISO             12
-#define SD_MOSI             13
-#define SD_SCLK             14
-#define SD_CS               15
+// don't sleep if it is in debug mode
+//#define DEBUG
+
+// by default, the SD card access frequency is 4 MHz(see SD.h)
+// this causes WDT resets in larger SD cards, change this to 40MHz 
+// so it can read the files without timing out
+#define SD_FREQUENCY_HZ (40000000)
+
+#define T5      0
+#define T5_PLUS 1
+
+#define BOARD_TYPE T5_PLUS
+
+#if BOARD_TYPE == T5_PLUS
+  #define SD_MISO             16
+  #define SD_MOSI             15
+  #define SD_SCLK             11
+  #define SD_CS               42
+#else
+  #define SD_MISO             12
+  #define SD_MOSI             13
+  #define SD_SCLK             14
+  #define SD_CS               15
+#endif
 
 // threshold of frame values average to consider a frame as dark
-#define DARK_PX_RATIO_TH 0.89
+#define DARK_PX_RATIO_TH 0.80
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
 
@@ -33,7 +53,11 @@ RTC_DATA_ATTR int bootCount = 0;
     Time ESP32 will go to sleep in seconds
     (larger values - longer battery life)
 */
-#define TIME_TO_SLEEP 300
+#ifdef DEBUG
+  #define TIME_TO_SLEEP 5
+#else
+  #define TIME_TO_SLEEP 120
+#endif
 
 /*
     How many frames to advance each update
@@ -215,14 +239,13 @@ void setup()
   epd_init();
 
   // 3. Init SD card
-  bool rlst = SD.begin(SD_CS);
+  bool rlst = SD.begin(SD_CS, SPI, SD_FREQUENCY_HZ);
   if (rlst) {
     Serial.printf("➸ Detected SdCard insert:%.2f GB\n", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
 
     //--------------------
     // Draw new frame
     //--------------------
-
     // When reading the battery voltage, POWER_EN must be turned on
     epd_poweron();
 
@@ -240,7 +263,7 @@ void setup()
   // Go to sleep
   //------------------------------
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP) + " Seconds");
+  Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP) + " seconds");
   Serial.flush();
   esp_deep_sleep_start();
 }

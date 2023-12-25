@@ -1,8 +1,12 @@
 #include "Filename.h"
 
-namespace Filename
+namespace Filename 
 {
-  char *getPath()
+  RTC_DATA_ATTR int fileNumber = 0;
+  RTC_DATA_ATTR char curFolder[128];
+  char frameFilePath[128];
+
+  char * getPath()
   {
     genFilePath(curFolder, fileNumber, frameFilePath);
     return frameFilePath;
@@ -161,10 +165,6 @@ namespace Filename
 
   void genFilePath(const char *folder, const int fileNumber, char *frameFilePath)
   {
-    sprintf(frameFilePath, "%s/%06d.jpg", folder, fileNumber);
+    sprintf(frameFilePath, "/%s/%06d.jpg", folder, fileNumber);
   }
-
-  RTC_DATA_ATTR int fileNumber = 0;
-  RTC_DATA_ATTR char curFolder[128];
-  char frameFilePath[128];
 }
