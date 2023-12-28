@@ -2,6 +2,11 @@
 #error "Please enable PSRAM !!!"
 #endif
 
+#define T5_BASE 0
+#define T5_PLUS 1
+
+#define BOARD_TYPE T5_PLUS
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
@@ -14,17 +19,12 @@
 #include "DrawFuncs.h"
 
 // don't sleep if it is in debug mode
-//#define DEBUG
+// #define DEBUG
 
-// by default, the SD card access frequency is 4 MHz(see SD.h)
-// this causes WDT resets in larger SD cards, change this to 40MHz 
+// by default, the SD card access frequency is 4 MHz (see SD.h)
+// this causes WDT resets in larger SD cards, change this to 80MHz 
 // so it can read the files without timing out
-#define SD_FREQUENCY_HZ (40000000)
-
-#define T5      0
-#define T5_PLUS 1
-
-#define BOARD_TYPE T5_PLUS
+#define SD_FREQUENCY_HZ (80000000)
 
 #if BOARD_TYPE == T5_PLUS
   #define SD_MISO             16
@@ -54,7 +54,7 @@ RTC_DATA_ATTR int bootCount = 0;
     (larger values - longer battery life)
 */
 #ifdef DEBUG
-  #define TIME_TO_SLEEP_S 10
+  #define TIME_TO_SLEEP_S 30
 #else
   #define TIME_TO_SLEEP_S 120
 #endif
@@ -127,7 +127,6 @@ void updateDisplay() {
   framebuffer = (uint8_t *)heap_caps_malloc(EPD_WIDTH * EPD_HEIGHT / 2, MALLOC_CAP_SPIRAM);
   if (!framebuffer) {
     Serial.println("alloc memory failed !!!");
-    //lastError = MEM_ALOC_ERROR;
     while (1);
   }
   memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
@@ -220,6 +219,7 @@ void updateDisplay() {
 void setup()
 {
   Serial.begin(115200);
+  while(!Serial) { delay (10); }
 
   // Track reboots
   ++bootCount;
@@ -237,11 +237,14 @@ void setup()
 
   // 2. Init EPD
   epd_init();
+}
 
+void loop()
+{
   // 3. Init SD card
   bool rlst = SD.begin(SD_CS, SPI, SD_FREQUENCY_HZ);
   if (rlst) {
-    Serial.printf("➸ Detected SdCard insert:%.2f GB\n", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
+    Serial.printf("➸ Detected SdCard (type %d) insert:%.2f GB\n", SD.cardType(), (SD.cardSize() / (1024.0 * 1024.0 * 1024.0)));
 
     //--------------------
     // Draw new frame
@@ -255,7 +258,9 @@ void setup()
     // POWER_EN control and also turn off the blue LED light
     epd_poweroff_all();
   } else {
-    Serial.println("SD init failed, restarting");
+    Serial.println("SD init failed, waiting for 1s then restarting");
+    // sleep for 1s so that we ease the boot loop
+    sleep(1L);
     ESP.restart();
   }
 
@@ -266,9 +271,4 @@ void setup()
   Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP_S) + " seconds");
   Serial.flush();
   esp_deep_sleep_start();
-}
-
-void loop()
-{
-  return;
 }
