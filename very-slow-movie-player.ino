@@ -2,11 +2,6 @@
 #error "Please enable PSRAM !!!"
 #endif
 
-#define T5_BASE 0
-#define T5_PLUS 1
-
-#define BOARD_TYPE T5_PLUS
-
 #include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
@@ -26,7 +21,10 @@
 // so it can read the files without timing out
 #define SD_FREQUENCY_HZ (80000000)
 
-#if BOARD_TYPE == T5_PLUS
+// comment this out if you are not using a T5 Plus board 
+#define T5_PLUS
+
+#ifdef T5_PLUS
   #define SD_MISO             16
   #define SD_MOSI             15
   #define SD_SCLK             11
@@ -219,7 +217,6 @@ void updateDisplay() {
 void setup()
 {
   Serial.begin(115200);
-  while(!Serial) { delay (10); }
 
   // Track reboots
   ++bootCount;
@@ -237,10 +234,7 @@ void setup()
 
   // 2. Init EPD
   epd_init();
-}
 
-void loop()
-{
   // 3. Init SD card
   bool rlst = SD.begin(SD_CS, SPI, SD_FREQUENCY_HZ);
   if (rlst) {
@@ -269,6 +263,10 @@ void loop()
   //------------------------------
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP_S * uS_TO_S_FACTOR);
   Serial.println("Going to sleep now for " + String(TIME_TO_SLEEP_S) + " seconds");
-  Serial.flush();
   esp_deep_sleep_start();
+}
+
+void loop()
+{
+  return;
 }

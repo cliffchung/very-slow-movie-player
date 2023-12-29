@@ -1,6 +1,11 @@
 #include "MyUtils.h"
 
+#ifdef T5_PLUS
+#define BATT_PIN            14
+#else
 #define BATT_PIN            36
+#endif
+
 // Threshold to show low battery indicator
 #define VOLTAGE_THRESHOLD   3.7
 
