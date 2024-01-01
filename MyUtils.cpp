@@ -1,13 +1,8 @@
 #include "MyUtils.h"
-
-#ifdef T5_PLUS
-#define BATT_PIN            14
-#else
-#define BATT_PIN            36
-#endif
+#include "pins.h"
 
 // Threshold to show low battery indicator
-#define VOLTAGE_THRESHOLD   3.7
+#define VOLTAGE_THRESHOLD   (3.70f)
 
 namespace MyUtils
 {
@@ -78,7 +73,13 @@ float readVoltage()
 {
   // Correct the ADC reference voltage
   esp_adc_cal_characteristics_t adc_chars;
-  esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+  esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
+      ADC_UNIT_1,
+      ADC_ATTEN_DB_11,
+      ADC_WIDTH_BIT_12,
+      vref,
+      &adc_chars
+  );
   if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF)
   {
     Serial.printf("eFuse Vref:%u mV", adc_chars.vref);

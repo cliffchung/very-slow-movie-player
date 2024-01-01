@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
+#include "pins.h"
 #include "epd_driver.h"
 
 #include "firasans.h"
@@ -20,21 +21,6 @@
 // this causes WDT resets in larger SD cards, change this to 80MHz 
 // so it can read the files without timing out
 #define SD_FREQUENCY_HZ (80000000)
-
-// comment this out if you are not using a T5 Plus board 
-#define T5_PLUS
-
-#ifdef T5_PLUS
-  #define SD_MISO             16
-  #define SD_MOSI             15
-  #define SD_SCLK             11
-  #define SD_CS               42
-#else
-  #define SD_MISO             12
-  #define SD_MOSI             13
-  #define SD_SCLK             14
-  #define SD_CS               15
-#endif
 
 // threshold of frame values average to consider a frame as dark
 #define DARK_PX_RATIO_TH 0.80
@@ -85,7 +71,7 @@ RTC_DATA_ATTR int bootCount = 0;
    Lower values means less frames will repeat in case of reset
    but more writes to the SD card.
 */
-#define SAVE_FILE_NUM_EVERY 50   /* How many frames to wait between saving file number */
+#define SAVE_FILE_NUM_EVERY 10   /* How many frames to wait between saving file number */
 
 //#define SHOW_LOG
 //#define SHOW_BARS
@@ -104,7 +90,7 @@ void updateDisplay() {
   // Read voltage
   //--------------------------
   volatile float battery_voltage = MyUtils::readVoltage();
-  String voltage = "➸ Voltage :" + String(battery_voltage) + "V";
+  String voltage = "➸ Voltage : " + String(battery_voltage) + "V";
   Serial.println(voltage);
 
   //--------------------------
@@ -245,6 +231,7 @@ void setup()
     //--------------------
     // When reading the battery voltage, POWER_EN must be turned on
     epd_poweron();
+    delay(10);
 
     updateDisplay();
 
