@@ -12,7 +12,7 @@ namespace JpegUtils
   {
     Serial.print("Open: ");
     Serial.println(filename);
-    myfile = SD.open(filename);
+    myfile = SD_MMC.open(filename);
     if (myfile)
     {
       *size = myfile.size();

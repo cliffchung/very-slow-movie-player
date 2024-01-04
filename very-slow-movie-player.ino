@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include <SD.h>
+#include <SD_MMC.h>
 #include "pins.h"
 #include "epd_driver.h"
 
@@ -200,6 +200,14 @@ void updateDisplay() {
   Serial.printf("Update took %dms.\n", t2 - t1);
 }
 
+void rebootWithReason(String reason) {
+    Serial.println(reason);
+    // sleep for 1s so that we ease the boot loop
+    Serial.println("Waiting 1s before restart");
+    sleep(1L);
+    ESP.restart();
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -211,39 +219,33 @@ void setup()
   //--------------------------
   // Init SD card
   //--------------------------
-
-  // Note:
-  // The order of the following lines is VERY important!
-
-  // 1. Init SPI
-  SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-
-  // 2. Init EPD
-  epd_init();
-
-  // 3. Init SD card
-  bool rlst = SD.begin(SD_CS, SPI, SD_FREQUENCY_HZ);
-  if (rlst) {
-    Serial.printf("➸ Detected SdCard (type %d) insert:%.2f GB\n", SD.cardType(), (SD.cardSize() / (1024.0 * 1024.0 * 1024.0)));
-
-    //--------------------
-    // Draw new frame
-    //--------------------
-    // When reading the battery voltage, POWER_EN must be turned on
-    epd_poweron();
-    delay(10);
-
-    updateDisplay();
-
-    // Turn off the power of the entire
-    // POWER_EN control and also turn off the blue LED light
-    epd_poweroff_all();
-  } else {
-    Serial.println("SD init failed, waiting for 1s then restarting");
-    // sleep for 1s so that we ease the boot loop
-    sleep(1L);
-    ESP.restart();
+#if defined(T5_47_PLUS)
+  if(!SD_MMC.setPins(SD_SCLK, SD_MOSI, SD_MISO)){
+    rebootWithReason("SD card pin configuration failed!");
   }
+#endif
+
+  if(!SD_MMC.begin("/sdcard", true)){
+    rebootWithReason("SD init failed");
+  }
+
+  if (SD_MMC.cardType() == CARD_NONE) {
+    Serial.println("SD card could not be read, insert a valid SD then reboot");
+    return;
+  }
+
+  Serial.printf("Detected SdCard (type %d) insert:%.2f GB\n", SD_MMC.cardType(), (SD_MMC.cardSize() / (1024.0 * 1024.0 * 1024.0)));
+
+  //--------------------
+  // Draw new frame
+  //--------------------
+  epd_init();
+  epd_poweron();
+  updateDisplay();
+
+  // Turn off the power of the entire
+  // POWER_EN control and also turn off the blue LED light
+  epd_poweroff_all();
 
   //------------------------------
   // Go to sleep

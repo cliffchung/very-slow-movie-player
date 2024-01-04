@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SD.h>
+#include <SD_MMC.h>
 
 // Path of file to store current folder and frame number
 #define FOLDER_FILE "/__cur_folder_b.txt"

@@ -14,7 +14,7 @@ namespace Filename
 
   void readFromSd()
   {
-    File myfile = SD.open(FOLDER_FILE);
+    File myfile = SD_MMC.open(FOLDER_FILE);
     if (myfile)
     {
       int pos = 0;
@@ -51,7 +51,7 @@ namespace Filename
 
   void writeToSd()
   {
-    File myfile = SD.open(FOLDER_FILE, FILE_WRITE);
+    File myfile = SD_MMC.open(FOLDER_FILE, FILE_WRITE);
     if (myfile)
     {
       // Folder name
@@ -78,7 +78,7 @@ namespace Filename
     genFilePath(curFolder, fileNumber, frameFilePath);
 
     Serial.print("Check exist "); Serial.println(frameFilePath);
-    if (!SD.exists(frameFilePath))
+    if (!SD_MMC.exists(frameFilePath))
     {
       moveToNextFolder();
     }
@@ -91,7 +91,7 @@ namespace Filename
     fileNumber = 1;
 
     // Now need to find the next folder
-    File dir = SD.open("/");
+    File dir = SD_MMC.open("/sdcard");
     dir.rewindDirectory();
 
     File entry;
@@ -147,7 +147,7 @@ namespace Filename
       if (entry.isDirectory())
       {
         genFilePath(entry.name(), fileNumber, frameFilePath);
-        if (SD.exists(frameFilePath))
+        if (SD_MMC.exists(frameFilePath))
         {
           strlcpy(curFolder, entry.name(), 127);
           Serial.printf("Found new folder %s\n", curFolder);
