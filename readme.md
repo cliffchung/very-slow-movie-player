@@ -96,6 +96,15 @@ $ brew install imagemagick
 $ brew install ghostscript
 ```
 
+## BOM (2024)
+
+- [LILYGO® TTGO T5-4.7 Plus](https://www.aliexpress.us/item/3256802803613744.html)
+- 3.7v Li-Po battery (the larger the better), [example](https://www.aliexpress.us/item/2251832696873453.html)
+- A picture frame
+- Some foam board for mounting the display in the picture frame
+
+Total cost: about $60
+
 ## BOM (2021)
 
 - [LILYGO® TTGO T5-4.7](https://www.aliexpress.com/item/1005002006058892.html)
