@@ -14,13 +14,8 @@
 #include "JpegUtils.h"
 #include "DrawFuncs.h"
 
-// don't sleep if it is in debug mode
+// update more frequently in debug mode
 // #define DEBUG
-
-// by default, the SD card access frequency is 4 MHz (see SD.h)
-// this causes WDT resets in larger SD cards, change this to 80MHz 
-// so it can read the files without timing out
-#define SD_FREQUENCY_HZ (80000000)
 
 // threshold of frame values average to consider a frame as dark
 #define DARK_PX_RATIO_TH 0.80
@@ -204,7 +199,7 @@ void rebootWithReason(String reason) {
     Serial.println(reason);
     // sleep for 1s so that we ease the boot loop
     Serial.println("Waiting 1s before restart");
-    sleep(1L);
+    delay(1000L);
     ESP.restart();
 }
 
@@ -225,7 +220,7 @@ void setup()
   }
 #endif
 
-  if(!SD_MMC.begin("/sdcard", true)){
+  if(!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT, 5)){
     rebootWithReason("SD init failed");
   }
 
@@ -240,7 +235,9 @@ void setup()
   // Draw new frame
   //--------------------
   epd_init();
+  delay(10L);
   epd_poweron();
+  delay(10L);
   updateDisplay();
 
   // Turn off the power of the entire
