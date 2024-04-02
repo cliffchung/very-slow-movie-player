@@ -33,7 +33,7 @@ RTC_DATA_ATTR int bootCount = 0;
     (larger values - longer battery life)
 */
 #ifdef DEBUG
-  #define TIME_TO_SLEEP_S 30
+  #define TIME_TO_SLEEP_S 5
 #else
   #define TIME_TO_SLEEP_S 120
 #endif
@@ -106,7 +106,7 @@ void updateDisplay() {
   framebuffer = (uint8_t *)heap_caps_malloc(EPD_WIDTH * EPD_HEIGHT / 2, MALLOC_CAP_SPIRAM);
   if (!framebuffer) {
     Serial.println("alloc memory failed !!!");
-    while (1);
+    ESP.restart();
   }
   memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 

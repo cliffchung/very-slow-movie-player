@@ -14,7 +14,7 @@ namespace Filename
 
   void readFromSd()
   {
-    File myfile = SD_MMC.open(FOLDER_FILE);
+    File myfile = SD_MMC.open(FOLDER_FILE, FILE_READ);
     if (myfile)
     {
       int pos = 0;
@@ -72,12 +72,14 @@ namespace Filename
       Serial.printf("Failed to open file for write %s\n", FOLDER_FILE);
     }
   }
+
   void advance(uint8_t delta)
   {
     fileNumber += delta;
     genFilePath(curFolder, fileNumber, frameFilePath);
 
-    Serial.print("Check exist "); Serial.println(frameFilePath);
+    Serial.print("Check exist "); 
+    Serial.println(frameFilePath);
     if (!SD_MMC.exists(frameFilePath))
     {
       moveToNextFolder();
@@ -91,20 +93,26 @@ namespace Filename
     fileNumber = 1;
 
     // Now need to find the next folder
-    File dir = SD_MMC.open("/sdcard");
+    File dir = SD_MMC.open("/");
     dir.rewindDirectory();
 
     File entry;
     // Try to find File for curFolder
-    Serial.printf("Moving to current folder %s\n", curFolder);
+    Serial.printf("Moving to current folder: %s\n", curFolder);
+
     while (true)
     {
       entry = dir.openNextFile();
       if (!entry || (entry.isDirectory() && strcmp(entry.name(), curFolder) == 0))
       {
+        if (!entry) {
+          Serial.println("Directory open file not found");
+        }
+        else {
+          Serial.printf("Directory name is %s\n", entry.name());
+        }
         break;
       }
-      // Serial.printf("Checked %s, is not %s\n", entry.name(), curFolder);
     }
 
     if (!entry)
@@ -146,6 +154,7 @@ namespace Filename
       Serial.printf("Checking %s\n", entry.name());
       if (entry.isDirectory())
       {
+
         genFilePath(entry.name(), fileNumber, frameFilePath);
         if (SD_MMC.exists(frameFilePath))
         {
@@ -165,6 +174,11 @@ namespace Filename
 
   void genFilePath(const char *folder, const int fileNumber, char *frameFilePath)
   {
-    sprintf(frameFilePath, "/%s/%06d.jpg", folder, fileNumber);
+    if (strlen(folder) == 0) {
+      sprintf(frameFilePath, "/%06d.jpg", fileNumber);
+    }
+    else {
+      sprintf(frameFilePath, "/%s/%06d.jpg", folder, fileNumber);
+    }
   }
 }
